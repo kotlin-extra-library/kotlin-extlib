@@ -6,7 +6,7 @@ repositories {
     maven(url="https://dl.bintray.com/kotlin/kotlin-eap")
     mavenCentral()
 }
-group = "org.kotlin"
+group = "extra.kotlin"
 version = "0.0.1"
 
 kotlin {
