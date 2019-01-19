@@ -17,7 +17,7 @@ pluginManagement {
         }
     }
 }
-rootProject.name = "kotlin-common-library"
+rootProject.name = "kotlin-extra-library"
 
 
 enableFeaturePreview("GRADLE_METADATA")
