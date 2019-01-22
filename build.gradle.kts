@@ -10,7 +10,7 @@ group = "extra.kotlin"
 version = "0.0.1"
 
 kotlin {
-    jvm(){
+    jvm {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
     }
     js()

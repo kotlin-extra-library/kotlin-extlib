@@ -10,18 +10,8 @@ pluginManagement {
             if (requested.id.id == "kotlin-multiplatform") {
                 useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
             }
-
-            if (requested.id.id == "kotlin-multiplatform") {
-                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
-            }
         }
     }
 }
-rootProject.name = "kotlin-extra-library"
-
-
-enableFeaturePreview("GRADLE_METADATA")
-rootProject.name = "kotlin-common-library"
-
-
+rootProject.name = "kotlin-extlib"
 enableFeaturePreview("GRADLE_METADATA")
