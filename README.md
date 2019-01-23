@@ -1,7 +1,7 @@
 # Kotlin extra library [![](https://jitpack.io/v/lamba92/kotlin-extlib.svg)](https://jitpack.io/#lamba92/kotlin-extlib)
 This library is aimed to become a community powered extension of the Kotlin common standard library. 
 
-WARNING: At the current status the artifacts available are those for Linux, JVm and JS. As soon as I figure out how publish on Maven-Central multistep I'll publish the ones for MacOS, iOS and Windows.
+WARNING: At the current status the artifacts available are those for Linux, JVM and JS. As soon as I figure out how multistep publish on Maven-Central I'll publish the ones for MacOS, iOS and Windows.
 
 ## Installing  [![](https://jitpack.io/v/lamba92/kotlin-extlib.svg)](https://jitpack.io/#lamba92/kotlin-extlib)
 

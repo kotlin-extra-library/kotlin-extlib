@@ -42,30 +42,6 @@ kotlin {
             }
         }
     }
-    linuxArm32Hfp {
-        compilations("main"){
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxMips32 {
-        compilations("main"){
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxMipsel32 {
-        compilations("main"){
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
     linuxX64 {
         compilations("main"){
             outputKinds(DYNAMIC)
@@ -74,6 +50,30 @@ kotlin {
             }
         }
     }
+//    linuxArm32Hfp {
+//        compilations("main"){
+//            outputKinds(DYNAMIC)
+//            cinterops.create("nativeMutex") {
+//                includeDirs(buildDir)
+//            }
+//        }
+//    }
+//    linuxMips32 {
+//        compilations("main"){
+//            outputKinds(DYNAMIC)
+//            cinterops.create("nativeMutex") {
+//                includeDirs(buildDir)
+//            }
+//        }
+//    }
+//    linuxMipsel32 {
+//        compilations("main"){
+//            outputKinds(DYNAMIC)
+//            cinterops.create("nativeMutex") {
+//                includeDirs(buildDir)
+//            }
+//        }
+//    }
 
     sourceSets {
         val commonMain by getting {
@@ -115,18 +115,20 @@ kotlin {
         val macosX64Main by getting {
 
         }
-        val linuxArm32HfpMain by getting {
-
-        }
-        val linuxMips32Main by getting {
-
-        }
-        val linuxMipsel32Main by getting {
-
-        }
         val linuxX64Main by getting {
 
         }
+        
+        
+//        val linuxArm32HfpMain by getting {
+//
+//        }
+//        val linuxMips32Main by getting {
+//
+//        }
+//        val linuxMipsel32Main by getting {
+//
+//        }
     }
 }
 
