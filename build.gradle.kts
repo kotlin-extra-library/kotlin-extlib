@@ -18,6 +18,7 @@ kotlin {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
     }
     js()
+    sourceSets.create("nativeCommon")
     iosArm64 {
         compilations("main"){
             outputKinds(DYNAMIC)
@@ -79,7 +80,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.3")
+//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.4")
             }
         }
         val commonTest by getting {
@@ -110,26 +111,29 @@ kotlin {
             }
         }
 
+        val iosArm64Main by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
         val mingwX64Main by getting {
-
+            dependsOn(sourceSets["nativeCommon"])
         }
         val macosX64Main by getting {
-
+            dependsOn(sourceSets["nativeCommon"])
         }
         val linuxX64Main by getting {
-
+            dependsOn(sourceSets["nativeCommon"])
         }
 
 
-//        val linuxArm32HfpMain by getting {
-//
-//        }
-//        val linuxMips32Main by getting {
-//
-//        }
-//        val linuxMipsel32Main by getting {
-//
-//        }
+        val linuxArm32HfpMain by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
+        val linuxMips32Main by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
+        val linuxMipsel32Main by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
     }
 }
 
