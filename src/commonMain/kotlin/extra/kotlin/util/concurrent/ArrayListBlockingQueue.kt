@@ -1,12 +1,17 @@
 package extra.kotlin.util.concurrent
 
 import extra.kotlin.util.collection.Queue
+import extra.kotlin.util.collection.addTo
 
 
 class ArrayListBlockingQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
 
     private val data = ArrayList<E>()
     private val mutex = Lock()
+
+    constructor(collection: Collection<E>): this(){
+        collection.addTo(data)
+    }
 
     // AbstractCollection methods
     override val size: Int
@@ -21,22 +26,14 @@ class ArrayListBlockingQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
     override fun iterator() = data.iterator()
 
     // Queue interface method
-    override fun offer(e: E) {
-        add(e)
-    }
+    override fun offer(e: E) { add(e) }
 
-    override fun poll() = mutex.use { try {
-        data.first().also { remove(it) }
-    } catch (e: NoSuchElementException){
-        null
-    } }
+    override fun poll()
+            = mutex.use { if(isEmpty()) null else element().also { remove(it) } }
 
     override fun element() = mutex.use { data.first() }
 
-    override fun peek()= mutex.use { try {
-        data.first()
-    } catch (e: NoSuchElementException){
-        null
-    } }
+    override fun peek()
+            = mutex.use { if(isEmpty()) null else element() }
 
 }

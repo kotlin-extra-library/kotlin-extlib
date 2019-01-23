@@ -18,22 +18,14 @@ class ArrayListQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
     override fun iterator() = data.iterator()
 
     // Queue interface method
-    override fun offer(e: E) {
-        add(e)
-    }
+    override fun offer(e: E) { add(e) }
 
-    override fun poll() = try {
-        element().also { remove(it) }
-    } catch (e: NoSuchElementException){
-        null
-    }
+    override fun poll()
+            = if(isEmpty()) null else element().also { remove(it) }
 
     override fun element() = data.first()
 
-    override fun peek()= try {
-        element()
-    } catch (e: NoSuchElementException){
-        null
-    }
+    override fun peek()
+            = if(isEmpty()) null else element()
 
 }

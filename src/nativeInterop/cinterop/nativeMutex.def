@@ -1,0 +1,24 @@
+package = extra.kotlin.util.extra.kotlin.util.concurrent
+---
+#include <pthread.h>
+
+typedef struct kextra_mutex {
+    pthread_mutex_t* mutex;
+} kextra_mutex_t;
+
+
+void kextra_mutex_create(kextra_mutex_t* mutex) {
+    pthread_mutex_init(mutex->mutex, NULL);
+}
+
+void kextra_mutex_lock(kextra_mutex_t* mutex) {
+    pthread_mutex_lock(mutex->mutex);
+}
+
+void kextra_mutex_unlock(kextra_mutex_t* mutex) {
+    pthread_mutex_unlock(mutex->mutex);
+}
+
+void kextra_mutex_destroy(kextra_mutex_t* mutex) {
+    pthread_mutex_destroy(mutex->mutex);
+}
