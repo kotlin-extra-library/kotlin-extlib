@@ -1,4 +1,4 @@
-package = extra.kotlin.util.extra.kotlin.util.concurrent
+package = extra.kotlin.util.concurrent
 ---
 #include <pthread.h>
 

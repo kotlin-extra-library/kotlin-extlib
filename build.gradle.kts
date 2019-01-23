@@ -50,35 +50,36 @@ kotlin {
             }
         }
     }
-//    linuxArm32Hfp {
-//        compilations("main"){
-//            outputKinds(DYNAMIC)
-//            cinterops.create("nativeMutex") {
-//                includeDirs(buildDir)
-//            }
-//        }
-//    }
-//    linuxMips32 {
-//        compilations("main"){
-//            outputKinds(DYNAMIC)
-//            cinterops.create("nativeMutex") {
-//                includeDirs(buildDir)
-//            }
-//        }
-//    }
-//    linuxMipsel32 {
-//        compilations("main"){
-//            outputKinds(DYNAMIC)
-//            cinterops.create("nativeMutex") {
-//                includeDirs(buildDir)
-//            }
-//        }
-//    }
+    linuxArm32Hfp {
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
+    linuxMips32 {
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
+    linuxMipsel32 {
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
+//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.3")
             }
         }
         val commonTest by getting {
@@ -118,8 +119,8 @@ kotlin {
         val linuxX64Main by getting {
 
         }
-        
-        
+
+
 //        val linuxArm32HfpMain by getting {
 //
 //        }
