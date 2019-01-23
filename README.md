@@ -22,6 +22,10 @@ dependencies {
 Available backends are:
 - `-js`
 - `-jvm`
+- `-linuxarm32hfp`
+- `-linuxmips32`
+- `-linuxmipsel32`
+- `-linuxx64`
 
 Omit the backend syntax for multiplatform declarations: 
 `com.github.lamba92.kotlin-extlib:kotlin-extlib:{latest_version}`
