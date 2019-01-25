@@ -1,6 +1,12 @@
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.util.Properties
 
 plugins {
@@ -14,7 +20,7 @@ repositories {
     jcenter()
 }
 
-group = "it.lamba"
+group = "com.github.lamba92"
 version = "0.0.1"
 
 kotlin {
@@ -26,8 +32,20 @@ kotlin {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
     }
     js()
-    wasm32 {
+    wasm32()
+    iosArm64()
+    iosX64()
+    mingwX64()
+    macosX64()
+    linuxX64()
+    linuxArm32Hfp()
+    linuxMips32()
+    linuxMipsel32()
+    androidNativeArm64()
+
+    configure(nativeTargets) {
         compilations("main") {
+            defaultSourceSet.dependsOn(sourceSets["nativeCommon"])
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -35,72 +53,7 @@ kotlin {
         }
     }
 
-    iosArm64 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    mingwX64 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    macosX64 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxX64 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxArm32Hfp {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxMips32 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    linuxMipsel32 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    androidNativeArm64 {
-        compilations("main") {
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-
-    configure(listOf(jvm(), js(), metadata(), wasm32())) {
+    configure(platformIndependentTargets) {
         mavenPublication {
             val linuxOnlyPublication = this@mavenPublication
             tasks.withType<AbstractPublishToMaven>().all {
@@ -116,7 +69,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("org.jetbrains.kotlinx:atomicfu-common:0.12.1")
-//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.5")
             }
         }
         val commonTest by getting {
@@ -147,35 +99,6 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-
-        val iosArm64Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val mingwX64Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val macosX64Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val linuxX64Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-
-        val linuxArm32HfpMain by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val linuxMips32Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val linuxMipsel32Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val androidNativeArm64Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
-        val wasm32Main by getting {
-            dependsOn(sourceSets["nativeCommon"])
-        }
     }
 }
 
@@ -202,3 +125,9 @@ fun org.gradle.api.Project.signin(config: SigningExtension.() -> Unit) = configu
 
 fun properties(file: File) = Properties().apply{ load(file.inputStream()) }
 fun properties(fileSrc: String) = properties(file(fileSrc))
+
+val KotlinMultiplatformExtension.nativeTargets
+    get() = targets.filter { it is KotlinNativeTarget }.map { it as KotlinNativeTarget }
+
+val KotlinMultiplatformExtension.platformIndependentTargets
+    get() = targets.filter { it !is KotlinNativeTarget || it.konanTarget == KonanTarget.WASM32}
