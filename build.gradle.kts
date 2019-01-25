@@ -1,38 +1,41 @@
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.load.kotlin.signatures
 
 plugins {
     kotlin("multiplatform") version "1.3.20"
     id("maven-publish")
+    id("signing")
 }
 
 repositories {
     mavenCentral()
     jcenter()
 }
-group = "extra.kotlin"
+
+group = "it.lamba"
 version = "0.0.1"
 
 kotlin {
 
     sourceSets.create("nativeCommon")
     sourceSets.create("jvmCommon")
+
     jvm {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
-        mavenPublication {
-            artifactId = "jvm"
+    }
+    js()
+    wasm32 {
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
 
-        }
-    }
-    js {
-        mavenPublication {
-            artifactId = "js"
-        }
-    }
     iosArm64 {
-        mavenPublication {
-            artifactId = "ios"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -41,9 +44,6 @@ kotlin {
         }
     }
     mingwX64 {
-        mavenPublication {
-            artifactId = "windows"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -52,9 +52,6 @@ kotlin {
         }
     }
     macosX64 {
-        mavenPublication {
-            artifactId = "macos"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -63,9 +60,6 @@ kotlin {
         }
     }
     linuxX64 {
-        mavenPublication {
-            artifactId = "linuxX64"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -74,9 +68,6 @@ kotlin {
         }
     }
     linuxArm32Hfp {
-        mavenPublication {
-            artifactId = "linuxArm32Hfp"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -85,9 +76,6 @@ kotlin {
         }
     }
     linuxMips32 {
-        mavenPublication {
-            artifactId = "linuxMips32"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -96,9 +84,6 @@ kotlin {
         }
     }
     linuxMipsel32 {
-        mavenPublication {
-            artifactId = "linuxMipsel32"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -107,20 +92,6 @@ kotlin {
         }
     }
     androidNativeArm64 {
-        mavenPublication {
-            artifactId = "androidNativeArm64"
-        }
-        compilations("main"){
-            outputKinds(DYNAMIC)
-            cinterops.create("nativeMutex") {
-                includeDirs(buildDir)
-            }
-        }
-    }
-    wasm32 {
-        mavenPublication {
-            artifactId = "wasm32"
-        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -134,7 +105,7 @@ kotlin {
             val linuxOnlyPublication = this@mavenPublication
             tasks.withType<AbstractPublishToMaven>().all {
                 onlyIf {
-                    publication != linuxOnlyPublication || findProperty("isLinux") == "true"
+                    publication != linuxOnlyPublication || OperatingSystem.current().isLinux
                 }
             }
         }
@@ -145,7 +116,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("org.jetbrains.kotlinx:atomicfu-common:0.12.1")
-//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.4")
+//                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.5")
             }
         }
         val commonTest by getting {
@@ -208,5 +179,16 @@ kotlin {
     }
 }
 
+signin {
+    // TODO
+}
+
+publishing {
+    // TODO
+}
+
 fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.()->Unit) 
     = compilations[name].apply(config)
+
+fun org.gradle.api.Project.signin(config: SigningExtension.()->Unit)
+    = configure(config)
