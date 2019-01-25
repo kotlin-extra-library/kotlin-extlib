@@ -1,4 +1,4 @@
-package extra.kotlin.util.collection
+package extra.kotlin.collection
 
 interface Queue<E>: MutableCollection<E> {
 

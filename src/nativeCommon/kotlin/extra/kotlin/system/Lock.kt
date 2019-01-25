@@ -1,4 +1,4 @@
-package extra.kotlin.util.concurrent
+package extra.kotlin.system
 
 import kotlinx.cinterop.cValue
 

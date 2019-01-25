@@ -1,14 +1,15 @@
 pluginManagement {
     repositories {
-        maven(url="https://dl.bintray.com/kotlin/kotlin-eap")
         mavenCentral()
         maven(url="https://plugins.gradle.org/m2/")
+        google()
     }
 
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == "kotlin-multiplatform") {
-                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
+            when(requested.id.id){
+                "kotlin-multiplatform"-> useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
+                "com.android.library" -> useModule("com.android.tools.build:gradle:${requested.version}")
             }
         }
     }

@@ -2,24 +2,37 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
-    id("kotlin-multiplatform") version "1.3.20-eap-100"
+    kotlin("multiplatform") version "1.3.20"
     id("maven-publish")
 }
+
 repositories {
-    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     mavenCentral()
+    jcenter()
 }
 group = "extra.kotlin"
 version = "0.0.1"
 
 kotlin {
-    
+
+    sourceSets.create("nativeCommon")
+    sourceSets.create("jvmCommon")
     jvm {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
+        mavenPublication {
+            artifactId = "jvm"
+
+        }
     }
-    js()
-    sourceSets.create("nativeCommon")
+    js {
+        mavenPublication {
+            artifactId = "js"
+        }
+    }
     iosArm64 {
+        mavenPublication {
+            artifactId = "ios"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -28,6 +41,9 @@ kotlin {
         }
     }
     mingwX64 {
+        mavenPublication {
+            artifactId = "windows"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -36,6 +52,9 @@ kotlin {
         }
     }
     macosX64 {
+        mavenPublication {
+            artifactId = "macos"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -44,6 +63,9 @@ kotlin {
         }
     }
     linuxX64 {
+        mavenPublication {
+            artifactId = "linuxX64"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -52,6 +74,9 @@ kotlin {
         }
     }
     linuxArm32Hfp {
+        mavenPublication {
+            artifactId = "linuxArm32Hfp"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -60,6 +85,9 @@ kotlin {
         }
     }
     linuxMips32 {
+        mavenPublication {
+            artifactId = "linuxMips32"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -68,6 +96,31 @@ kotlin {
         }
     }
     linuxMipsel32 {
+        mavenPublication {
+            artifactId = "linuxMipsel32"
+        }
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
+    androidNativeArm64 {
+        mavenPublication {
+            artifactId = "androidNativeArm64"
+        }
+        compilations("main"){
+            outputKinds(DYNAMIC)
+            cinterops.create("nativeMutex") {
+                includeDirs(buildDir)
+            }
+        }
+    }
+    wasm32 {
+        mavenPublication {
+            artifactId = "wasm32"
+        }
         compilations("main"){
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
@@ -76,10 +129,22 @@ kotlin {
         }
     }
 
+    configure(listOf(jvm(), js(), metadata(), wasm32())){
+        mavenPublication {
+            val linuxOnlyPublication = this@mavenPublication
+            tasks.withType<AbstractPublishToMaven>().all {
+                onlyIf {
+                    publication != linuxOnlyPublication || findProperty("isLinux") == "true"
+                }
+            }
+        }
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
+                implementation("org.jetbrains.kotlinx:atomicfu-common:0.12.1")
 //                implementation("com.github.lamba92.kotlin-extlib:kotlin-extlib:0.0.4")
             }
         }
@@ -90,6 +155,7 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            dependsOn(sourceSets["jvmCommon"])
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
             }
@@ -123,8 +189,7 @@ kotlin {
         val linuxX64Main by getting {
             dependsOn(sourceSets["nativeCommon"])
         }
-
-
+        
         val linuxArm32HfpMain by getting {
             dependsOn(sourceSets["nativeCommon"])
         }
@@ -132,6 +197,12 @@ kotlin {
             dependsOn(sourceSets["nativeCommon"])
         }
         val linuxMipsel32Main by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
+        val androidNativeArm64Main by getting {
+            dependsOn(sourceSets["nativeCommon"])
+        }
+        val wasm32Main by getting {
             dependsOn(sourceSets["nativeCommon"])
         }
     }

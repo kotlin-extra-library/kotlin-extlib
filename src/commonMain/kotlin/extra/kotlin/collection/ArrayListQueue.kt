@@ -1,9 +1,9 @@
-package extra.kotlin.util.collection
+package extra.kotlin.collection
 
 
-class ArrayListQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
+open class ArrayListQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
 
-    private val data = ArrayList<E>()
+    protected val data = ArrayList<E>()
 
     constructor(collection: Collection<E>): this(){
         collection.addTo(data)
