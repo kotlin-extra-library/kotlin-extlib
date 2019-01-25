@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.load.kotlin.signatures
+import java.util.Properties
 
 plugins {
     kotlin("multiplatform") version "1.3.20"
@@ -27,7 +27,7 @@ kotlin {
     }
     js()
     wasm32 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -36,7 +36,7 @@ kotlin {
     }
 
     iosArm64 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -44,7 +44,7 @@ kotlin {
         }
     }
     mingwX64 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -52,7 +52,7 @@ kotlin {
         }
     }
     macosX64 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -60,7 +60,7 @@ kotlin {
         }
     }
     linuxX64 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -68,7 +68,7 @@ kotlin {
         }
     }
     linuxArm32Hfp {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -76,7 +76,7 @@ kotlin {
         }
     }
     linuxMips32 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -84,7 +84,7 @@ kotlin {
         }
     }
     linuxMipsel32 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -92,7 +92,7 @@ kotlin {
         }
     }
     androidNativeArm64 {
-        compilations("main"){
+        compilations("main") {
             outputKinds(DYNAMIC)
             cinterops.create("nativeMutex") {
                 includeDirs(buildDir)
@@ -100,7 +100,7 @@ kotlin {
         }
     }
 
-    configure(listOf(jvm(), js(), metadata(), wasm32())){
+    configure(listOf(jvm(), js(), metadata(), wasm32())) {
         mavenPublication {
             val linuxOnlyPublication = this@mavenPublication
             tasks.withType<AbstractPublishToMaven>().all {
@@ -160,7 +160,7 @@ kotlin {
         val linuxX64Main by getting {
             dependsOn(sourceSets["nativeCommon"])
         }
-        
+
         val linuxArm32HfpMain by getting {
             dependsOn(sourceSets["nativeCommon"])
         }
@@ -184,11 +184,22 @@ signin {
 }
 
 publishing {
-    // TODO
+    repositories {
+        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            .credentials {
+                val localProperties = properties("local.properties")
+                val sonatypeUsername: String by localProperties
+                val sonatypePassword: String by localProperties
+                username = sonatypeUsername
+                password = sonatypePassword
+            }
+    }
 }
 
-fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.()->Unit) 
-    = compilations[name].apply(config)
+fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.() -> Unit) =
+    compilations[name].apply(config)
 
-fun org.gradle.api.Project.signin(config: SigningExtension.()->Unit)
-    = configure(config)
+fun org.gradle.api.Project.signin(config: SigningExtension.() -> Unit) = configure(config)
+
+fun properties(file: File) = Properties().apply{ load(file.inputStream()) }
+fun properties(fileSrc: String) = properties(file(fileSrc))
