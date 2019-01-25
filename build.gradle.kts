@@ -187,9 +187,8 @@ publishing {
     repositories {
         maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
             .credentials {
-                val localProperties = properties("local.properties")
-                val sonatypeUsername: String by localProperties
-                val sonatypePassword: String by localProperties
+                val sonatypeUsername: String by properties("local.properties")
+                val sonatypePassword: String by properties("local.properties")
                 username = sonatypeUsername
                 password = sonatypePassword
             }
