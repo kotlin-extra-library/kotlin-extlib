@@ -30,20 +30,3 @@ class SortedSet<E>(
 
     override fun iterator() = data.iterator()
 }
-
-fun main() {
-    val s = SortedSet<Int>(Comparator { a, b -> b-a })
-    (0..10).forEach { s.add(it) }
-    println(buildString {
-        s.forEach { append("$it ") }
-    })
-    println(s.size)
-    for(i in 0..12){
-        s.add(i)
-    }
-    println(buildString {
-        s.forEach { append("$it ") }
-    })
-    println(s.size)
-
-}
