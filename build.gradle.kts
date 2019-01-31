@@ -1,3 +1,4 @@
+import groovy.util.Node
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -42,6 +43,11 @@ kotlin {
     linuxMips32()
     linuxMipsel32()
     androidNativeArm64()
+    metadata {
+        mavenPublication {
+            artifactId = "kotlin-extlib-common"
+        }
+    }
 
     configure(nativeTargets) {
         compilations("main") {
@@ -102,32 +108,86 @@ kotlin {
     }
 }
 
-signin {
-    // TODO
+val javadocJar by tasks.creating(Jar::class) {
+    archiveClassifier.value("javadoc")
+    // TODO: instead of a single empty Javadoc JAR, generate real documentation for each module
+}
+
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.value("sources")
 }
 
 publishing {
+    publications {
+        configure(withType<MavenPublication>()) {
+            signing.sign(this)
+            customizeForMavenCentral(pom)
+            artifact(javadocJar)
+        }
+        withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
+    }
     repositories {
         maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
             .credentials {
-                val sonatypeUsername: String by properties("local.properties")
-                val sonatypePassword: String by properties("local.properties")
+                val sonatypeUsername: String by project
+                val sonatypePassword: String by project
                 username = sonatypeUsername
                 password = sonatypePassword
             }
     }
 }
 
+fun customizeForMavenCentral(pom: org.gradle.api.publish.maven.MavenPom) = pom.buildAsNode {
+    add("description", "Kotlin community common multiplatform library")
+    add("name", "Kotlin Extra Library")
+    add("url", "https://github.com/lamba92/kotlin-extlib")
+    node("organization") {
+        add("name", "com.github.lamba92")
+        add("url", "https://github.com/lamba92")
+    }
+    node("issueManagement") {
+        add("system", "github")
+        add("url", "https://github.com/lamba92/kotlin-extlib/issues")
+    }
+    node("licenses") {
+        node("license") {
+            add("name", "Apache License 2.0")
+            add("url", "https://github.com/lamba92/kotlin-extlib/blob/master/LICENSE")
+            add("distribution", "repo")
+        }
+    }
+    node("scm") {
+        add("url", "https://github.com/lamba92/kotlin-extlib")
+        add("connection", "scm:git:git://github.com/lamba92/kotlin-extlib.git")
+        add("developerConnection", "scm:git:ssh://github.com/lamba92/kotlin-extlib.git")
+    }
+    node("developers") {
+        node("developer") {
+            add("name", "Lamba92")
+        }
+    }
+}
+
 fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.() -> Unit) =
     compilations[name].apply(config)
 
-fun org.gradle.api.Project.signin(config: SigningExtension.() -> Unit) = configure(config)
 
-fun properties(file: File) = Properties().apply{ load(file.inputStream()) }
-fun properties(fileSrc: String) = properties(file(fileSrc))
+fun properties(file: File)
+        = Properties().apply { load(file.inputStream()) }
+fun properties(fileSrc: String)
+        = properties(file(fileSrc))
 
 val KotlinMultiplatformExtension.nativeTargets
     get() = targets.filter { it is KotlinNativeTarget }.map { it as KotlinNativeTarget }
 
 val KotlinMultiplatformExtension.platformIndependentTargets
-    get() = targets.filter { it !is KotlinNativeTarget || it.konanTarget == KonanTarget.WASM32}
+    get() = targets.filter { it !is KotlinNativeTarget || it.konanTarget == KonanTarget.WASM32 }
+
+fun Node.add(key: String, value: String)
+        = appendNode(key).setValue(value)
+
+fun Node.node(key: String, content: Node.() -> Unit)
+        = appendNode(key).also(content)
+
+fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit)
+        = withXml { asNode().apply(builder) }

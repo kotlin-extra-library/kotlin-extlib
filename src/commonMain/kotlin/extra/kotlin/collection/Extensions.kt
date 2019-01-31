@@ -1,5 +1,6 @@
 package extra.kotlin.collection
 
-import kotlin.coroutines.AbstractCoroutineContextElement
-
-fun <E> Collection<E>.addTo(collection: MutableCollection<E>) = collection.addAll(this)
+/**
+ * Adds [this] collection to the [target] collection.
+ */
+fun <E> Collection<E>.addTo(target: MutableCollection<E>) = target.addAll(this)

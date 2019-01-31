@@ -1,40 +1,21 @@
 package extra.kotlin.util
 
-import kotlin.experimental.and
+fun Long.getBytes() = ByteArray(8).apply {
+    var buff = this@getBytes
+    repeat(size) {
+        this[it] = buff.toByte()
+        buff = buff shr 8
+    }
+}
 
-//@ExperimentalUnsignedTypes
-//fun Byte.toHexChars(): String {
-//    val msb = (this ushr 4).toInt()
-//    val lsb = (this and 15).toInt()
-//
-//    return buildString {
-//        when {
-//            msb <= 9 -> append(msb)
-//            else -> append((msb+87).toChar())
-//        }
-//        when {
-//            lsb <= 9 -> append(msb)
-//            else -> append((lsb+87).toChar())
-//        }
-//    }
-//}
-//
-//@ExperimentalUnsignedTypes
-//infix fun UByte.shr(i: Int)
-//    = (this.toUInt() shr i).toUByte()
-//
-//
-//infix fun Byte.ushr(i: Int)
-//    = (this.toInt() ushr i).toByte()
-//
-//@ExperimentalUnsignedTypes
-//fun Long.getBytes() = ByteArray(8).apply {
-//    var buff = this@getBytes
-//    repeat(size){
-//        this[it] = buff.toByte()
-//        buff = buff shl 8
-//    }
-//}
+fun Double.getBytes()
+        = toRawBits().getBytes()
 
-infix fun Byte.and(i: Int) = toInt() and i
+val Byte.upperNibble get() = (this.toInt() shr 4 and 0b1111).toByte()
+val Byte.lowerNibble get() = (this.toInt() and 0b1111).toByte()
+@ExperimentalUnsignedTypes
+val UByte.upperNibble get() = (this.toInt() shr 4 and 0b1111).toUByte()
+@ExperimentalUnsignedTypes
+val UByte.lowerNibble get() = (this.toInt() and 0b1111).toUByte()
+
 

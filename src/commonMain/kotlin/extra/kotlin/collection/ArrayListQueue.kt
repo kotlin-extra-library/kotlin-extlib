@@ -1,6 +1,8 @@
 package extra.kotlin.collection
 
-
+/**
+ * A simple FIFO queue backed by an [ArrayList]
+ */
 open class ArrayListQueue<E>(): Queue<E>, AbstractMutableCollection<E>() {
 
     protected val data = ArrayList<E>()
