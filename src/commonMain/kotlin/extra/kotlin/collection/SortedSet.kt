@@ -23,7 +23,6 @@ class SortedSet<E>(
         return if (index >= 0)
             false
         else {
-            val i = abs(index)
             data.add(abs(index) - 1, element)
             true
         }
