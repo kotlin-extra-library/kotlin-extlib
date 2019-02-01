@@ -1,9 +1,9 @@
-# Kotlin extra library [![Maven Central](https://img.shields.io/maven-central/v/com.github.lamba92/kotlin-extlib-common.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.lamba92%22%20AND%20a:%22kotlin-extlib-common%22)
+# Kotlin extra library [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib)
 This library is aimed to become a community powered extension of the Kotlin common standard library. 
 
 No OSX available until I get my hands on a macbook
 
-## Installing  [![Maven Central](https://img.shields.io/maven-central/v/com.github.lamba92/kotlin-extlib-common.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.lamba92%22%20AND%20a:%22kotlin-extlib-common%22)
+## Installing  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib)
 
 Import the latest version in the `build.gradle` of the modules you need:
 
