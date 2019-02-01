@@ -22,7 +22,7 @@ repositories {
 }
 
 group = "com.github.lamba92"
-version = "0.0.2"
+version = "0.0.3"
 
 kotlin {
 
@@ -74,7 +74,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:atomicfu-common:0.12.1")
             }
         }
         val commonTest by getting {
