@@ -1,4 +1,4 @@
-# Kotlin extra library [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib)
+# Kotlin extra library 
 This library is aimed to become a community powered extension of the Kotlin common standard library. 
 
 ## Installing 

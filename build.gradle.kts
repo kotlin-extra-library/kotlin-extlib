@@ -1,12 +1,8 @@
 import groovy.util.Node
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.util.Properties
 
@@ -61,10 +57,9 @@ kotlin {
 
     configure(platformIndependentTargets) {
         mavenPublication {
-            val linuxOnlyPublication = this@mavenPublication
             tasks.withType<AbstractPublishToMaven>().all {
                 onlyIf {
-                    publication != linuxOnlyPublication || OperatingSystem.current().isLinux
+                    publication != this@mavenPublication || OperatingSystem.current().isLinux
                 }
             }
         }
@@ -171,10 +166,8 @@ fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilatio
     compilations[name].apply(config)
 
 
-fun properties(file: File)
-        = Properties().apply { load(file.inputStream()) }
-fun properties(fileSrc: String)
-        = properties(file(fileSrc))
+fun properties(file: File) = Properties().apply { load(file.inputStream()) }
+fun properties(fileSrc: String) = properties(file(fileSrc))
 
 val KotlinMultiplatformExtension.nativeTargets
     get() = targets.filter { it is KotlinNativeTarget }.map { it as KotlinNativeTarget }
@@ -182,11 +175,17 @@ val KotlinMultiplatformExtension.nativeTargets
 val KotlinMultiplatformExtension.platformIndependentTargets
     get() = targets.filter { it !is KotlinNativeTarget || it.konanTarget == KonanTarget.WASM32 }
 
-fun Node.add(key: String, value: String)
-        = appendNode(key).setValue(value)
+val KotlinMultiplatformExtension.appleTargets
+    get() = targets.filter {
+        it is KotlinNativeTarget && listOf(
+            KonanTarget.IOS_ARM64,
+            KonanTarget.IOS_X64,
+            KonanTarget.MACOS_X64
+        ).any { target -> it == target }
+    }
 
-fun Node.node(key: String, content: Node.() -> Unit)
-        = appendNode(key).also(content)
+fun Node.add(key: String, value: String) = appendNode(key).setValue(value)
 
-fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit)
-        = withXml { asNode().apply(builder) }
+fun Node.node(key: String, content: Node.() -> Unit) = appendNode(key).also(content)
+
+fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit) = withXml { asNode().apply(builder) }
