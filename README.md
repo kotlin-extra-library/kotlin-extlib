@@ -14,7 +14,7 @@ dependencies {
 If using Gradle Kotlin DSL:
 ```
 dependencies {
-    implementation("com.github.lamba92", "kotlin-extlib{-backend}", "{latest_version}")
+    implementation("com.github.lamba92", "kotlin-extlib-{backend}", "{latest_version}")
 }
 ```
 
