@@ -18,7 +18,7 @@ repositories {
 }
 
 group = "com.github.lamba92"
-version = "0.0.3"
+version = "0.0.4"
 
 kotlin {
 
@@ -41,7 +41,7 @@ kotlin {
     androidNativeArm64()
     metadata {
         mavenPublication {
-            artifactId = "kotlin-extlib-common"
+            artifactId = "kotlin-extlib-metadata"
         }
     }
 
@@ -55,7 +55,7 @@ kotlin {
         }
     }
 
-    configure(platformIndependentTargets) {
+    configure(platformIndependentTargets + androidTargets) {
         mavenPublication {
             tasks.withType<AbstractPublishToMaven>().all {
                 onlyIf {
@@ -181,7 +181,28 @@ val KotlinMultiplatformExtension.appleTargets
             KonanTarget.IOS_ARM64,
             KonanTarget.IOS_X64,
             KonanTarget.MACOS_X64
-        ).any { target -> it == target }
+        ).any { target -> it.konanTarget == target }
+    }
+
+val KotlinMultiplatformExtension.windowsTargets
+    get() = targets.filter { it is KotlinNativeTarget && it.konanTarget == KonanTarget.MINGW_X64 }
+
+val KotlinMultiplatformExtension.linuxTargets
+    get() = targets.filter {
+        it is KotlinNativeTarget && listOf(
+            KonanTarget.LINUX_ARM32_HFP,
+            KonanTarget.LINUX_MIPS32,
+            KonanTarget.LINUX_MIPSEL32,
+            KonanTarget.LINUX_X64
+        ).any { target -> it.konanTarget == target }
+    }
+
+val KotlinMultiplatformExtension.androidTargets
+    get() = targets.filter {
+        it is KotlinNativeTarget && listOf(
+            KonanTarget.ANDROID_ARM32,
+            KonanTarget.ANDROID_ARM64
+        ).any { target -> it.konanTarget == target }
     }
 
 fun Node.add(key: String, value: String) = appendNode(key).setValue(value)

@@ -1,6 +1,6 @@
 package extra.kotlin.collection
 
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 
 /**
  * A simple FIFO sorted queue backed by an [ArrayList]. Insertions are ordered,
@@ -19,6 +19,12 @@ class SortedQueue<E>(
             data.sortWith(comparator)
     }
 
-    override fun add(element: E) =
-        data.add(abs(data.binarySearch(element, comparator)) - 1, element).let { true }
+    override fun add(element: E): Boolean {
+        val index = data.binarySearch(element, comparator)
+        when {
+            index >= 0 -> data.add(index, element)
+            index < 0 -> data.add(index.absoluteValue - 1, element)
+        }
+        return true
+    }
 }

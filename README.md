@@ -19,7 +19,7 @@ dependencies {
 ```
 
 Available backends are:
-- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-common/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-common) `common`
+- [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-common) `common`
 - [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-js/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-js) `js`
 - [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-jvm/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-jvm) `jvm`
 - [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-linuxarm32hfp/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lamba92/kotlin-extlib-linuxarm32hfp) `linuxarm32hfp`
