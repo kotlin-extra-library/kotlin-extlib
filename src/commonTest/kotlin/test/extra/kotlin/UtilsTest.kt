@@ -1,5 +1,6 @@
 package test.extra.kotlin
 
+import extra.kotlin.bytes.lowerNibble
 import extra.kotlin.getBytesLE
 import extra.kotlin.lowerNibble
 import extra.kotlin.upperNibble
