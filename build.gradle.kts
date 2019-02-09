@@ -17,13 +17,12 @@ repositories {
     jcenter()
 }
 
-group = "com.github.lamba92"
+group = "org.kotlin.extra"
 version = "0.0.4"
 
 kotlin {
 
     sourceSets.create("nativeCommon")
-    sourceSets.create("jvmCommon")
 
     jvm {
         compilations["main"].kotlinOptions.jvmTarget = "1.8"
@@ -78,7 +77,6 @@ kotlin {
             }
         }
         val jvmMain by getting {
-            dependsOn(sourceSets["jvmCommon"])
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
             }
@@ -110,24 +108,31 @@ val javadocJar by tasks.creating(Jar::class) {
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.value("sources")
 }
+if(file("local.properties").exists()){
 
-publishing {
-    publications {
-        configure(withType<MavenPublication>()) {
-            signing.sign(this)
-            customizeForMavenCentral(pom)
-            artifact(javadocJar)
-        }
-        withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
-    }
-    repositories {
-        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-            .credentials {
-                val sonatypeUsername: String by project
-                val sonatypePassword: String by project
-                username = sonatypeUsername
-                password = sonatypePassword
+    val localProp = properties("local.properties")
+    extra["signing.keyId"] = localProp["signing.keyId"]
+    extra["signing.password"] = localProp["signing.passwordv"]
+    extra["signing.secretKeyRingFile"] = localProp["signing.secretKeyRingFile"]
+
+    publishing {
+        publications {
+            configure(withType<MavenPublication>()) {
+                signing.sign(this)
+                customizeForMavenCentral(pom)
+                artifact(javadocJar)
             }
+            withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
+        }
+        repositories {
+            maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                .credentials {
+                    val sonatypeUsername: String by localProp
+                    val sonatypePassword: String by localProp
+                    username = sonatypeUsername
+                    password = sonatypePassword
+                }
+        }
     }
 }
 
