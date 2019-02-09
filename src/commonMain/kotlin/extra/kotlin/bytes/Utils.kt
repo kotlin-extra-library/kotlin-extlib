@@ -1,9 +1,8 @@
-package extra.kotlin
+package extra.kotlin.bytes
 
 import kotlin.js.JsName
 import kotlin.jvm.JvmName
 
-@Deprecated("Package moved", ReplaceWith("this.getBytesLE()", "extra.kotlin.bytes.getBytesLE"))
 fun Long.getBytesLE() = ByteArray(8).apply {
     var buff = this@getBytesLE
     repeat(size) {
@@ -12,17 +11,20 @@ fun Long.getBytesLE() = ByteArray(8).apply {
     }
 }
 
-@Deprecated("Package moved", ReplaceWith("this.getBytesLE()", "extra.kotlin.bytes.getBytesLE"))
 fun Double.getBytesLE()
         = toRawBits().getBytesLE()
 
-@Deprecated("Package moved", ReplaceWith("this.upperNibble", "extra.kotlin.bytes.upperNibble"))
 val Byte.upperNibble get() = (this.toInt() shr 4 and 0b1111).toByte()
-
-@Deprecated("Package moved", ReplaceWith("this.lowerNibble", "extra.kotlin.bytes.lowerNibble"))
 val Byte.lowerNibble get() = (this.toInt() and 0b1111).toByte()
+@ExperimentalUnsignedTypes
+@get:JvmName("upperNibbleUnsigned")
+@get:JsName("upperNibbleUnsigned")
+val UByte.upperNibble get() = (this.toInt() shr 4 and 0b1111).toUByte()
+@ExperimentalUnsignedTypes
+@get:JvmName("lowerNibbleUnsigned")
+@get:JsName("lowerNibbleUnsigned")
+val UByte.lowerNibble get() = (this.toInt() and 0b1111).toUByte()
 
-@Deprecated("Package moved", ReplaceWith("this.writeBytesLE()", "extra.kotlin.bytes.writeBytesLE"))
 fun ByteArray.writeBytesLE(value: Long, offset : Int = 0) : Int {
     if (this.size - offset >= 8)
         throw IndexOutOfBoundsException("The remaining space is less then 8")

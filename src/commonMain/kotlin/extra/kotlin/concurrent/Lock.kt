@@ -1,4 +1,6 @@
-package extra.kotlin.system
+package extra.kotlin.concurrent
+
+//TODO: This would better belong in 'extra.kotlin.concurrent'
 
 expect class Lock() {
     fun lock()

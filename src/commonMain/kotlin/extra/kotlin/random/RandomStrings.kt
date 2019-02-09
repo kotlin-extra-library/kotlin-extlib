@@ -1,5 +1,6 @@
 package extra.kotlin.random
 
+import extra.kotlin.util.UUID
 import kotlin.random.Random
 
 /**
@@ -7,34 +8,10 @@ import kotlin.random.Random
  * @param useUppercase Uses uppercase letters instead.
  * @return The randomly generated UUID string.
  */
-fun Random.uuid(useUppercase: Boolean = false) = buildString {
-    for(i in 0 until 8)
-        append(nextHexChar(useUppercase))
-
-    append('-')
-
-    for(i in 0 until 4)
-        append(nextHexChar(useUppercase))
-
-    append("-4")
-
-    for(i in 0 until 3)
-        append(nextHexChar())
-
-    append("-")
-
-    append(when(nextInt(2)){
-        0 -> if(useUppercase) nextUppercaseLetter(0, 1) else nextLowercaseLetter(0, 1)
-        else -> nextNumericChar(8, 9)
-    })
-
-    for(i in 0 until 3)
-        append(nextHexChar(useUppercase))
-
-    append('-')
-
-    for(i in 0 until 12)
-        append(nextHexChar(useUppercase))
+@Deprecated("Use UUIDs directly instead.", replaceWith = ReplaceWith("UUID.uuid4().toString()", "extra.kotlin.util.UUID"))
+fun Random.uuid(useUppercase: Boolean = false) = UUID.uuid4().toString().let{
+    if(useUppercase) it.toUpperCase()
+    else it
 }
 
 /**

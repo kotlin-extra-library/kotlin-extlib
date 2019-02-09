@@ -2,6 +2,7 @@ package extra.kotlin.util
 
 // Author https://kotlinlang.org/docs/tutorials/multiplatform-library.html
 
+//TODO: Move to encoding package?  Also add URL compliant Base64 variant
 object Base64  {
 
     private val BASE64_ALPHABET: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
