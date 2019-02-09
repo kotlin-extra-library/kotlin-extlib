@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class Collections {
 
     @Test
-    fun `test ArrayListQueue`(){
+    fun testArrayListQueue(){
         val q = ArrayListQueue(listOf(1, 3, 5, 7))
         val output = ArrayList<Int>()
         while (q.isNotEmpty()){
