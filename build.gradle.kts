@@ -204,7 +204,7 @@ fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilatio
     compilations[name].apply(config)
 
 fun properties(file: File)
-        = Properties().apply { load(file.inputStream()) }
+        = Properties().apply { load(file.apply { if (!exists()) createNewFile() }.inputStream()) }
 
 fun properties(fileSrc: String)
         = properties(file(fileSrc))
