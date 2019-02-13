@@ -38,8 +38,10 @@ cache:
   - "$HOME/.gradle/wrapper/"
   - "$HOME/.konan/caches/"
 after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST"
-  == "false" ]; then echo "Deploying..." && ./gradlew publish; fi
+  - |
+    if ([ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]); then
+      echo "Deploying..." && ./gradlew publish
+    fi
 env:
   global:
   - SIGNING_SECRETRINGFILE=./secret.gpg
