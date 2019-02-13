@@ -25,7 +25,9 @@ kotlin {
     sourceSets.create("nativeCommon")
 
     jvm {
-        compilations["main"].kotlinOptions.jvmTarget = "1.8"
+        configure(compilations){
+            kotlinOptions.jvmTarget = "1.8"
+        }
     }
     js()
     wasm32()
