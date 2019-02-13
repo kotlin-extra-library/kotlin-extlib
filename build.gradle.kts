@@ -100,20 +100,47 @@ kotlin {
     }
 }
 
-val javadocJar by tasks.creating(Jar::class) {
-    archiveClassifier.value("javadoc")
-    // TODO: instead of a single empty Javadoc JAR, generate real documentation for each module
-}
+val localProp = properties("local.properties")
 
-val sourcesJar by tasks.creating(Jar::class) {
-    archiveClassifier.value("sources")
-}
-if(file("local.properties").exists()){
+val keyId = System.getenv()["SIGNING_KEYID"]
+        ?: localProp["signing.keyId"] as String?
+        ?: extra.getOrNull("signing.keyId") as String?
+val gpgPassword = System.getenv()["SIGNING_PASSWORD"]
+        ?: localProp["signing.password"] as String?
+        ?: extra.getOrNull("signing.password") as String?
+val gpgFile = System.getenv()["SIGNING_SECRETRINGFILE"]
+        ?: localProp["signing.secretKeyRingFile"] as String?
+        ?: extra.getOrNull("signing.secretKeyRingFile") as String?
+val sonatypeUsername = System.getenv()["SONATYPEUSERNAME"]
+        ?: localProp["sonatypeUsername"] as String?
+        ?: extra.getOrNull("sonatypeUsername") as String?
+val sonatypePassword = System.getenv()["SONATYPEPASSWORD"]
+        ?: localProp["sonatypePassword"] as String?
+        ?: extra.getOrNull("sonatypePassword") as String?
 
-    val localProp = properties("local.properties")
-    extra["signing.keyId"] = localProp["signing.keyId"]
-    extra["signing.password"] = localProp["signing.passwordv"]
-    extra["signing.secretKeyRingFile"] = localProp["signing.secretKeyRingFile"]
+if (listOf(
+        keyId,
+        gpgPassword,
+        gpgFile,
+        sonatypeUsername,
+        sonatypePassword
+    ).none { it == null } && file(gpgFile!!).exists()
+) {
+
+    println("Publishing setup detected. Setting up publishing...")
+
+    val javadocJar by tasks.creating(Jar::class) {
+        archiveClassifier.value("javadoc")
+        // TODO: instead of a single empty Javadoc JAR, generate real documentation for each module
+    }
+
+    val sourcesJar by tasks.creating(Jar::class) {
+        archiveClassifier.value("sources")
+    }
+
+    extra["signing.keyId"] = keyId
+    extra["signing.password"] = gpgPassword
+    extra["signing.secretKeyRingFile"] = gpgFile
 
     publishing {
         publications {
@@ -126,15 +153,21 @@ if(file("local.properties").exists()){
         }
         repositories {
             maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                .credentials {
-                    val sonatypeUsername: String by localProp
-                    val sonatypePassword: String by localProp
-                    username = sonatypeUsername
-                    password = sonatypePassword
-                }
+                    .credentials {
+                        username = sonatypeUsername
+                        password = sonatypePassword
+                    }
         }
     }
-}
+} else println(buildString {
+    appendln("Not enough information to publish:")
+    appendln("keyId: ${if (keyId == null) "NOT " else ""}found")
+    appendln("gpgPassword: ${if (gpgPassword == null) "NOT " else ""}found")
+    appendln("gpgFile: ${gpgFile ?: "NOT found"}")
+    appendln("gpgFile presence: ${gpgFile?.let { file(it).exists() } ?: "false"}")
+    appendln("sonatypeUsername: ${if (sonatypeUsername == null) "NOT " else ""}found")
+    appendln("sonatypePassword: ${if (sonatypePassword == null) "NOT " else ""}found")
+})
 
 fun customizeForMavenCentral(pom: org.gradle.api.publish.maven.MavenPom) = pom.buildAsNode {
     add("description", "Kotlin community common multiplatform library")
@@ -170,9 +203,11 @@ fun customizeForMavenCentral(pom: org.gradle.api.publish.maven.MavenPom) = pom.b
 fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.() -> Unit) =
     compilations[name].apply(config)
 
+fun properties(file: File)
+        = Properties().apply { load(file.inputStream()) }
 
-fun properties(file: File) = Properties().apply { load(file.inputStream()) }
-fun properties(fileSrc: String) = properties(file(fileSrc))
+fun properties(fileSrc: String)
+        = properties(file(fileSrc))
 
 val KotlinMultiplatformExtension.nativeTargets
     get() = targets.filter { it is KotlinNativeTarget }.map { it as KotlinNativeTarget }
@@ -210,8 +245,14 @@ val KotlinMultiplatformExtension.androidTargets
         ).any { target -> it.konanTarget == target }
     }
 
-fun Node.add(key: String, value: String) = appendNode(key).setValue(value)
+fun Node.add(key: String, value: String)
+        = appendNode(key).setValue(value)
 
-fun Node.node(key: String, content: Node.() -> Unit) = appendNode(key).also(content)
+fun Node.node(key: String, content: Node.() -> Unit)
+        = appendNode(key).also(content)
 
-fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit) = withXml { asNode().apply(builder) }
+fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit)
+        = withXml { asNode().apply(builder) }
+
+fun ExtraPropertiesExtension.getOrNull(name: String)
+        = if(has(name)) get(name) else null

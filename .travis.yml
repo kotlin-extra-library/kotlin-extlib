@@ -1,0 +1,46 @@
+matrix:
+  include:
+  - os: windows
+    language: c
+    before_install:
+    - choco install jdk11
+    - choco install openssl.light
+    - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
+      -in secret.gpg.enc -out secret.gpg
+      -d
+    script: ".\\\\gradlew check"
+  - os: linux
+    language: java
+    jdk: openjdk11
+    before_install:
+    - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
+      -in secret.gpg.enc -out secret.gpg
+      -d
+    - chmod +x gradlew
+    script: "./gradlew check"
+  - os: osx
+    language: java
+    jdk: openjdk11
+    before_install:
+    - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
+      -in secret.gpg.enc -out secret.gpg
+      -d
+    - chmod +x gradlew
+    script: "./gradlew check"
+  allow_failures:
+  - os: windows
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.konan/caches/"
+after_success:
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST"
+  == "false" ]; then echo "Deploying..." && ./gradlew publish; fi
+env:
+  global:
+  - SIGNING_SECRETRINGFILE=./secret.gpg
+
