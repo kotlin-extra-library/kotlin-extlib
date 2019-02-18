@@ -45,6 +45,7 @@ cache:
 deploy:
   provider: script
   script: ./gradle publish
+  skip_cleanup: true
   on:
     tags: true
     branch: master
