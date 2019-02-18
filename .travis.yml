@@ -40,7 +40,7 @@ cache:
   directories:
     - "$HOME/.gradle/caches/"
     - "$HOME/.gradle/wrapper/"
-    - "$HOME/.konan/caches/"
+    - "$HOME/.konan/cache/"
 
 deploy:
   provider: script
