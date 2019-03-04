@@ -183,7 +183,7 @@ fun setupPublishingForMavenCentral(
 
         println("Publishing setup detected. Setting up publishing for\n$deployUrl")
 
-        extra["signing.keyId_"] = keyId_
+        extra["signing.keyId"] = keyId_
         extra["signing.password"] = gpgPassword_
         extra["signing.secretKeyRingFile"] = gpgFile_
 
