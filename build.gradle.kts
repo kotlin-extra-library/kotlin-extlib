@@ -1,13 +1,17 @@
+import Build_gradle.OS.LINUX
+import Build_gradle.OS.WINDOWS
+import Build_gradle.OS.MAC
 import groovy.util.Node
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.util.Properties
 
 plugins {
-    kotlin("multiplatform") version "1.3.20"
+    kotlin("multiplatform") version "1.3.30-eap-11"
     id("maven-publish")
     id("signing")
 }
@@ -15,9 +19,10 @@ plugins {
 repositories {
     mavenCentral()
     jcenter()
+    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
 }
 
-group = "org.kotlin.extra"
+group = "org.kotlinextra"
 version = System.getenv()["TRAVIS_TAG"] ?: "0.1.0"
 
 kotlin {
@@ -25,15 +30,17 @@ kotlin {
     sourceSets.create("nativeCommon")
 
     jvm {
-        configure(compilations){
+        configure(compilations) {
             kotlinOptions.jvmTarget = "1.8"
         }
     }
     js()
-    // wasm32()
+    wasm32()
     iosArm64()
+    iosArm32()
     iosX64()
     mingwX64()
+    mingwX86()
     macosX64()
     linuxX64()
     linuxArm32Hfp()
@@ -56,15 +63,9 @@ kotlin {
         }
     }
 
-    configure(platformIndependentTargets + androidTargets) {
-        mavenPublication {
-            tasks.withType<AbstractPublishToMaven>().all {
-                onlyIf {
-                    publication != this@mavenPublication || OperatingSystem.current().isLinux
-                }
-            }
-        }
-    }
+    publish(platformIndependentTargets + androidTargets) onlyOn LINUX
+    publish(windowsTargets) onlyOn WINDOWS
+    publish(appleTargets) onlyOn MAC
 
     sourceSets {
         val commonMain by getting {
@@ -102,103 +103,176 @@ kotlin {
     }
 }
 
+val javadocJar by tasks.creating(Jar::class) {
+    archiveClassifier.value("javadoc")
+    // TODO: instead of a single empty Javadoc JAR, generate real documentation for each module
+}
+
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.value("sources")
+}
+
 val localProp = properties("local.properties")
 
-val keyId = System.getenv()["SIGNING_KEYID"]
-        ?: localProp["signing.keyId"] as String?
-        ?: extra.getOrNull("signing.keyId") as String?
-val gpgPassword = System.getenv()["SIGNING_PASSWORD"]
-        ?: localProp["signing.password"] as String?
-        ?: extra.getOrNull("signing.password") as String?
-val gpgFile = System.getenv()["SIGNING_SECRETRINGFILE"]
-        ?: localProp["signing.secretKeyRingFile"] as String?
-        ?: extra.getOrNull("signing.secretKeyRingFile") as String?
-        ?: if(file("./secret.gpg").exists()) file("./secret.gpg").absolutePath else null
-val sonatypeUsername = System.getenv()["SONATYPEUSERNAME"]
-        ?: localProp["sonatypeUsername"] as String?
-        ?: extra.getOrNull("sonatypeUsername") as String?
-val sonatypePassword = System.getenv()["SONATYPEPASSWORD"]
-        ?: localProp["sonatypePassword"] as String?
-        ?: extra.getOrNull("sonatypePassword") as String?
+var keyId = recoverProperty("signing.keyId")
+var gpgPassword = recoverProperty("signing.password")
+var gpgFile = recoverProperty("signing.secretKeyRingFile")
+    ?: file("./secret.gpg").run { if (exists()) absolutePath else null }
+var sonatypeUsername = recoverProperty("sonatypeUsername")
+var sonatypePassword = recoverProperty("sonatypePassword")
 
-if (listOf(
-        keyId,
-        gpgPassword,
-        gpgFile,
-        sonatypeUsername,
-        sonatypePassword
-    ).none { it == null } && file(gpgFile!!).exists()
+setupPublishingForMavenCentral(
+    "Kotlin community common multiplatform library",
+    "Kotlin Extra Library",
+    "https://github.com/lamba92/kotlin-extlib",
+    "org.kotlinextra",
+    "kotlinextra.org",
+    "github",
+    "https://github.com/kotlin-extra-library/kotlin-extlib/issues",
+    listOf(
+        License(
+            "Apache License 2.0",
+            "https://github.com/kotlin-extra-library/kotlin-extlib/blob/master/LICENSE",
+            "repo"
+        )
+    ),
+    "https://github.com/kotlin-extra-library/kotlin-extlib",
+    "scm:git:https://github.com/kotlin-extra-library/kotlin-extlib.git",
+    "scm:git@github.com:kotlin-extra-library/kotlin-extlib.git",
+    listOf(
+        Developer("Lamba92", "basti.lamberto@gmail.com"),
+        Developer("SOFe", "sofe2038@gmail.com"),
+        Developer("UnknownJoe796")
+    ),
+    javadocJar, sourcesJar
+)
+
+fun recoverProperty(propertyName: String) = System.getenv()[propertyName.toUpperCase().replace('.', '_')]
+    ?: localProp[propertyName] as String?
+    ?: extra.getOrNull(propertyName) as String?
+
+fun setupPublishingForMavenCentral(
+    description: String,
+    name: String,
+    url: String,
+    organizationName: String,
+    organizationUrl: String,
+    issueManagementSystem: String,
+    issueManagementUrl: String,
+    licenses: List<License>,
+    scmUrl: String,
+    scmConnection: String,
+    scmDevConnection: String,
+    developers: List<Developer>,
+    javadocJar: Jar,
+    sourcesJar: Jar,
+    keyId_: String? = keyId,
+    gpgPassword_: String? = gpgPassword,
+    gpgFile_: String? = gpgFile,
+    sonatypeUsername_: String? = sonatypeUsername,
+    sonatypePassword_: String? = sonatypePassword
 ) {
+    if (listOf(
+            keyId_,
+            gpgPassword_,
+            gpgFile_,
+            sonatypeUsername_,
+            sonatypePassword_
+        ).none { it == null } && file(gpgFile_!!).exists()
+    ) {
+        val deployUrl = "https://oss.sonatype.org/" + if ((version as String).contains("snapshot", true))
+            "content/repositories/snapshots"
+        else
+            "service/local/staging/deploy/maven2"
 
-    println("Publishing setup detected. Setting up publishing...")
+        println("Publishing setup detected. Setting up publishing for\n$deployUrl")
 
-    val javadocJar by tasks.creating(Jar::class) {
-        archiveClassifier.value("javadoc")
-        // TODO: instead of a single empty Javadoc JAR, generate real documentation for each module
-    }
+        extra["signing.keyId_"] = keyId_
+        extra["signing.password"] = gpgPassword_
+        extra["signing.secretKeyRingFile"] = gpgFile_
 
-    val sourcesJar by tasks.creating(Jar::class) {
-        archiveClassifier.value("sources")
-    }
-
-    extra["signing.keyId"] = keyId
-    extra["signing.password"] = gpgPassword
-    extra["signing.secretKeyRingFile"] = gpgFile
-
-    publishing {
-        publications {
-            configure(withType<MavenPublication>()) {
-                signing.sign(this)
-                customizeForMavenCentral(pom)
-                artifact(javadocJar)
+        publishing {
+            publications {
+                configure(withType<MavenPublication>()) {
+                    signing.sign(this)
+                    pom.customizeForMavenCentral(
+                        description, name, url,
+                        organizationName, organizationUrl,
+                        issueManagementSystem, issueManagementUrl,
+                        licenses, scmUrl, scmConnection,
+                        scmDevConnection, developers
+                    )
+                    artifact(javadocJar)
+                }
+                withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
             }
-            withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
+            repositories {
+                maven(url = deployUrl).credentials {
+                    username = sonatypeUsername_
+                    password = sonatypePassword_
+                }
+            }
         }
-        repositories {
-            maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                    .credentials {
-                        username = sonatypeUsername
-                        password = sonatypePassword
-                    }
-        }
-    }
-} else println(buildString {
-    appendln("Not enough information to publish:")
-    appendln("keyId: ${if (keyId == null) "NOT " else ""}found")
-    appendln("gpgPassword: ${if (gpgPassword == null) "NOT " else ""}found")
-    appendln("gpgFile: ${gpgFile ?: "NOT found"}")
-    appendln("gpgFile presence: ${gpgFile?.let { file(it).exists() } ?: "false"}")
-    appendln("sonatypeUsername: ${if (sonatypeUsername == null) "NOT " else ""}found")
-    appendln("sonatypePassword: ${if (sonatypePassword == null) "NOT " else ""}found")
-})
+    } else println(buildString {
+        appendln("Not enough information to publish:")
+        appendln("keyId: ${if (keyId_ == null) "NOT " else ""}found")
+        appendln("gpgPassword: ${if (gpgPassword_ == null) "NOT " else ""}found")
+        appendln("gpgFile: ${gpgFile_ ?: "NOT found"}")
+        appendln("gpgFile presence: ${gpgFile_?.let { file(it).exists() } ?: "false"}")
+        appendln("sonatypeUsername: ${if (sonatypeUsername_ == null) "NOT " else ""}found")
+        appendln("sonatypePassword: ${if (sonatypePassword_ == null) "NOT " else ""}found")
+    })
+}
 
-fun customizeForMavenCentral(pom: org.gradle.api.publish.maven.MavenPom) = pom.buildAsNode {
-    add("description", "Kotlin community common multiplatform library")
-    add("name", "Kotlin Extra Library")
-    add("url", "https://github.com/lamba92/kotlin-extlib")
+data class License(val name: String, val url: String, val distribution: String)
+data class Developer(val name: String, val email: String? = null)
+
+fun org.gradle.api.publish.maven.MavenPom.customizeForMavenCentral(
+    description: String,
+    name: String,
+    url: String,
+    organizationName: String,
+    organizationUrl: String,
+    issueManagementSystem: String,
+    issueManagementUrl: String,
+    licenses: List<License>,
+    scmUrl: String,
+    scmConnection: String,
+    scmDevConnection: String,
+    developers: List<Developer>
+) = buildAsNode {
+    add("description", description)
+    add("name", name)
+    add("url", url)
     node("organization") {
-        add("name", "com.github.lamba92")
-        add("url", "https://github.com/lamba92")
+        add("name", organizationName)
+        add("url", organizationUrl)
     }
     node("issueManagement") {
-        add("system", "github")
-        add("url", "https://github.com/lamba92/kotlin-extlib/issues")
+        add("system", issueManagementSystem)
+        add("url", issueManagementUrl)
     }
     node("licenses") {
-        node("license") {
-            add("name", "Apache License 2.0")
-            add("url", "https://github.com/lamba92/kotlin-extlib/blob/master/LICENSE")
-            add("distribution", "repo")
+        licenses.forEach {
+            node("license") {
+                add("name", it.name)
+                add("url", it.url)
+                add("distribution", it.distribution)
+            }
         }
     }
     node("scm") {
-        add("url", "https://github.com/lamba92/kotlin-extlib")
-        add("connection", "scm:git:git://github.com/lamba92/kotlin-extlib.git")
-        add("developerConnection", "scm:git:ssh://github.com/lamba92/kotlin-extlib.git")
+        add("url", scmUrl)
+        add("connection", scmConnection)
+        add("developerConnection", scmDevConnection)
     }
     node("developers") {
-        node("developer") {
-            add("name", "Lamba92")
+        developers.forEach {
+            node("developer") {
+                add("name", it.name)
+                if(it.email != null)
+                    add("email", it.email)
+            }
         }
     }
 }
@@ -206,11 +280,9 @@ fun customizeForMavenCentral(pom: org.gradle.api.publish.maven.MavenPom) = pom.b
 fun KotlinNativeTarget.compilations(name: String, config: KotlinNativeCompilation.() -> Unit) =
     compilations[name].apply(config)
 
-fun properties(file: File)
-        = Properties().apply { load(file.apply { if (!exists()) createNewFile() }.inputStream()) }
+fun properties(file: File) = Properties().apply { load(file.apply { if (!exists()) createNewFile() }.inputStream()) }
 
-fun properties(fileSrc: String)
-        = properties(file(fileSrc))
+fun properties(fileSrc: String) = properties(file(fileSrc))
 
 val KotlinMultiplatformExtension.nativeTargets
     get() = targets.filter { it is KotlinNativeTarget }.map { it as KotlinNativeTarget }
@@ -223,12 +295,18 @@ val KotlinMultiplatformExtension.appleTargets
         it is KotlinNativeTarget && listOf(
             KonanTarget.IOS_ARM64,
             KonanTarget.IOS_X64,
-            KonanTarget.MACOS_X64
+            KonanTarget.MACOS_X64,
+            KonanTarget.IOS_ARM32
         ).any { target -> it.konanTarget == target }
     }
 
 val KotlinMultiplatformExtension.windowsTargets
-    get() = targets.filter { it is KotlinNativeTarget && it.konanTarget == KonanTarget.MINGW_X64 }
+    get() = targets.filter {
+        it is KotlinNativeTarget && listOf(
+            KonanTarget.MINGW_X64,
+            KonanTarget.MINGW_X86
+        ).any { target -> it.konanTarget == target }
+    }
 
 val KotlinMultiplatformExtension.linuxTargets
     get() = targets.filter {
@@ -248,14 +326,32 @@ val KotlinMultiplatformExtension.androidTargets
         ).any { target -> it.konanTarget == target }
     }
 
-fun Node.add(key: String, value: String)
-        = appendNode(key).setValue(value)
+fun Node.add(key: String, value: String) = appendNode(key).setValue(value)
 
-fun Node.node(key: String, content: Node.() -> Unit)
-        = appendNode(key).also(content)
+fun Node.node(key: String, content: Node.() -> Unit) = appendNode(key).also(content)
 
-fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit)
-        = withXml { asNode().apply(builder) }
+fun org.gradle.api.publish.maven.MavenPom.buildAsNode(builder: Node.() -> Unit) = withXml { asNode().apply(builder) }
 
-fun ExtraPropertiesExtension.getOrNull(name: String)
-        = if(has(name)) get(name) else null
+fun ExtraPropertiesExtension.getOrNull(name: String) = if (has(name)) get(name) else null
+
+fun KotlinMultiplatformExtension.publish(targets: Iterable<KotlinTarget>) = targets
+
+infix fun Iterable<KotlinTarget>.onlyOn(os: OS) {
+    configure(this) {
+        mavenPublication {
+            tasks.withType<AbstractPublishToMaven>().all {
+                onlyIf {
+                    publication != this@mavenPublication || when (os) {
+                        LINUX -> OperatingSystem.current().isLinux
+                        MAC -> OperatingSystem.current().isMacOsX
+                        WINDOWS -> OperatingSystem.current().isWindows
+                    }
+                }
+            }
+        }
+    }
+}
+
+enum class OS {
+    LINUX, MAC, WINDOWS
+}
