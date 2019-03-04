@@ -23,7 +23,7 @@ repositories {
 }
 
 group = "org.kotlinextra"
-version = System.getenv()["TRAVIS_TAG"] ?: "0.1.5"
+version = System.getenv()["TRAVIS_TAG"] ?: "0.1.6"
 
 val localProp = properties("local.properties")
 
@@ -136,8 +136,8 @@ setupPublishingForMavenCentral(
     "scm:git:https://github.com/kotlin-extra-library/kotlin-extlib.git",
     "scm:git@github.com:kotlin-extra-library/kotlin-extlib.git",
     listOf(
-        Developer("Lamba92", "basti.lamberto@gmail.com"),
-        Developer("SOFe", "sofe2038@gmail.com"),
+        Developer("Lamba92"),
+        Developer("SOFe"),
         Developer("UnknownJoe796")
     ),
     javadocJar, sourcesJar
@@ -183,7 +183,7 @@ fun setupPublishingForMavenCentral(
 
         println("Publishing setup detected. Setting up publishing for\n$deployUrl")
 
-        extra["signing.keyId_"] = keyId_
+        extra["signing.keyId"] = keyId_
         extra["signing.password"] = gpgPassword_
         extra["signing.secretKeyRingFile"] = gpgFile_
 
@@ -203,7 +203,7 @@ fun setupPublishingForMavenCentral(
                 withType<MavenPublication>()["kotlinMultiplatform"].artifact(sourcesJar)
             }
             repositories {
-                maven(url = deployUrl).credentials {
+                maven(deployUrl).credentials {
                     username = sonatypeUsername_
                     password = sonatypePassword_
                 }
@@ -266,7 +266,7 @@ fun org.gradle.api.publish.maven.MavenPom.customizeForMavenCentral(
         developers.forEach {
             node("developer") {
                 add("name", it.name)
-                if(it.email != null)
+                if (it.email != null)
                     add("email", it.email)
             }
         }
@@ -332,16 +332,14 @@ fun ExtraPropertiesExtension.getOrNull(name: String) = if (has(name)) get(name) 
 
 fun KotlinMultiplatformExtension.publish(targets: Iterable<KotlinTarget>) = targets
 
-infix fun Iterable<KotlinTarget>.onlyOn(os: OS) {
-    configure(this) {
-        mavenPublication {
-            tasks.withType<AbstractPublishToMaven>().all {
-                onlyIf {
-                    publication != this@mavenPublication || when (os) {
-                        LINUX -> OperatingSystem.current().isLinux
-                        MAC -> OperatingSystem.current().isMacOsX
-                        WINDOWS -> OperatingSystem.current().isWindows
-                    }
+infix fun Iterable<KotlinTarget>.onlyOn(os: OS) = configure(this) {
+    mavenPublication {
+        tasks.withType<AbstractPublishToMaven>().all {
+            onlyIf {
+                publication != this@mavenPublication || when (os) {
+                    LINUX -> OperatingSystem.current().isLinux
+                    MAC -> OperatingSystem.current().isMacOsX
+                    WINDOWS -> OperatingSystem.current().isWindows
                 }
             }
         }

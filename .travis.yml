@@ -1,34 +1,17 @@
-matrix:
-  include:
-    - os: windows
-      language: c
-      before_install:
-        - choco install jdk11
-        - choco install openssl.light
-        - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
-          -in secret.gpg.enc -out secret.gpg
-          -d
-      script: "./gradlew check"
-    - os: linux
-      language: java
-      jdk: openjdk11
-      before_install:
-        - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
-          -in secret.gpg.enc -out secret.gpg
-          -d
-        - chmod +x gradlew
-      script: "./gradlew check"
-    - os: osx
-      language: java
-      jdk: openjdk11
-      before_install:
-        - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
-          -in secret.gpg.enc -out secret.gpg
-          -d
-        - chmod +x gradlew
+os:
+  - windows
+  - osx
+  - linux
 
+matrix:
   allow_failures:
     - os: windows
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
+    -in secret.gpg.enc -out secret.gpg
+    -d
+  - chmod +x gradlew
 
 script: ./gradlew check
 
