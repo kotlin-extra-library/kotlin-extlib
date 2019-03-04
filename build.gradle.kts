@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.util.Properties
 
 plugins {
-    kotlin("multiplatform") version "1.3.30-eap-11"
+    kotlin("multiplatform") version "1.3.21"
     id("maven-publish")
     id("signing")
 }
@@ -23,7 +23,9 @@ repositories {
 }
 
 group = "org.kotlinextra"
-version = System.getenv()["TRAVIS_TAG"] ?: "0.1.0"
+version = System.getenv()["TRAVIS_TAG"] ?: "0.1.5"
+
+val localProp = properties("local.properties")
 
 kotlin {
 
@@ -35,23 +37,19 @@ kotlin {
         }
     }
     js()
-    wasm32()
+//    wasm32() <-- keeps giving error
     iosArm64()
-    iosArm32()
+//    iosArm32()
     iosX64()
     mingwX64()
-    mingwX86()
+//    mingwX86()
     macosX64()
     linuxX64()
     linuxArm32Hfp()
     linuxMips32()
     linuxMipsel32()
     androidNativeArm64()
-    metadata {
-        mavenPublication {
-            artifactId = "kotlin-extlib-metadata"
-        }
-    }
+    metadata()
 
     configure(nativeTargets) {
         compilations("main") {
@@ -111,8 +109,6 @@ val javadocJar by tasks.creating(Jar::class) {
 val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.value("sources")
 }
-
-val localProp = properties("local.properties")
 
 var keyId = recoverProperty("signing.keyId")
 var gpgPassword = recoverProperty("signing.password")
@@ -295,16 +291,16 @@ val KotlinMultiplatformExtension.appleTargets
         it is KotlinNativeTarget && listOf(
             KonanTarget.IOS_ARM64,
             KonanTarget.IOS_X64,
-            KonanTarget.MACOS_X64,
-            KonanTarget.IOS_ARM32
+            KonanTarget.MACOS_X64
+//            KonanTarget.IOS_ARM32
         ).any { target -> it.konanTarget == target }
     }
 
 val KotlinMultiplatformExtension.windowsTargets
     get() = targets.filter {
         it is KotlinNativeTarget && listOf(
-            KonanTarget.MINGW_X64,
-            KonanTarget.MINGW_X86
+            KonanTarget.MINGW_X64
+//            KonanTarget.MINGW_X86
         ).any { target -> it.konanTarget == target }
     }
 
