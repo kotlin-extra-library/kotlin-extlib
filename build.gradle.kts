@@ -118,6 +118,7 @@ var sonatypeUsername = recoverProperty("sonatypeUsername")
 var sonatypePassword = recoverProperty("sonatypePassword")
 
 setupPublishingForMavenCentral(
+    (group as String).replace('.','-'),
     "Kotlin community common multiplatform library",
     "Kotlin Extra Library",
     "https://github.com/lamba92/kotlin-extlib",
@@ -148,6 +149,7 @@ fun recoverProperty(propertyName: String) = System.getenv()[propertyName.toUpper
     ?: extra.getOrNull(propertyName) as String?
 
 fun setupPublishingForMavenCentral(
+    repositoryName: String,
     description: String,
     name: String,
     url: String,
