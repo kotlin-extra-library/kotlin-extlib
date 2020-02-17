@@ -22,9 +22,9 @@ data class UUID(
                 leastSignificantBits = hexOnly.substring(16, 32).toULong(16).toLong()
             )
         }
-        fun uuid4(): UUID = UUID(
-            mostSignificantBits = (Random.nextLong() and (-1L - 0x000000000000F000) or (0x4000)),
-            leastSignificantBits = (Random.nextLong() and 0x3FFFFFFFFFFFFFFFL or (0x8000_0000L shl 32))
+        fun uuid4(random: Random = Random.Default): UUID = UUID(
+            mostSignificantBits = (random.nextLong() and (-1L - 0x000000000000F000) or (0x4000)),
+            leastSignificantBits = (random.nextLong() and 0x3FFFFFFFFFFFFFFFL or (0x8000_0000L shl 32))
         )
     }
 
