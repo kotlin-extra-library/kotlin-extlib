@@ -17,7 +17,7 @@ env:
   global:
     - GRAVIS_REPO="https://github.com/DanySK/Gravis-CI.git"
     - GRAVIS="$HOME/gravis"
-    - JDK="adopt@1.8.212-04"
+    - JDK="adopt@1.8.0-242"
 
 before_install:
   - travis_retry git clone --depth 1 $GRAVIS_REPO $GRAVIS
