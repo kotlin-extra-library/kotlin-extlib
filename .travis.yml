@@ -10,7 +10,7 @@ jobs:
       language: android
       android:
         components:
-          - build-tools-29.0.3
+          - build-tools-30.0.0-rc1
           - android-29
 
 env:

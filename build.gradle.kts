@@ -4,6 +4,7 @@ subprojects {
     repositories {
         mavenCentral()
         jcenter()
+        google()
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 }

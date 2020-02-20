@@ -12,4 +12,4 @@ gradleEnterprise {
 }
 
 rootProject.name = "kotlin-extlib"
-include(":core", ":collections")
+include(":core", ":collection")
