@@ -1,19 +1,15 @@
-pluginManagement {
-    repositories {
-        mavenCentral()
-        maven(url="https://plugins.gradle.org/m2/")
-        maven(url="https://dl.bintray.com/kotlin/kotlin-eap")
-        google()
-    }
+plugins {
+    @Suppress("UnstableApiUsage")
+    `gradle-enterprise`
+}
 
-    resolutionStrategy {
-        eachPlugin {
-            when(requested.id.id){
-                "kotlin-multiplatform"-> useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
-                "com.android.library" -> useModule("com.android.tools.build:gradle:${requested.version}")
-            }
-        }
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+        publishAlwaysIf(!System.getenv("CI").isNullOrEmpty())
     }
 }
+
 rootProject.name = "kotlin-extlib"
-enableFeaturePreview("GRADLE_METADATA")
+include(":core", ":collections")

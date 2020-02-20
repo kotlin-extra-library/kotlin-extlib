@@ -1,22 +1,30 @@
-language: java
-jdk: openjdk11
-
-os:
-  - windows
-  - osx
-  - linux
-
-matrix:
-  allow_failures:
+jobs:
+  include:
     - os: windows
+      language: bash
+
+    - os: osx
+      language: bash
+
+    - os: linux
+      language: android
+      android:
+        components:
+          - build-tools-29.0.3
+          - android-29
+
+env:
+  global:
+    - GRAVIS_REPO="https://github.com/DanySK/Gravis-CI.git"
+    - GRAVIS="$HOME/gravis"
+    - JDK="adopt@1.8.212-04"
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_3fdf79acf4ff_key -iv $encrypted_3fdf79acf4ff_iv
-    -in secret.gpg.enc -out secret.gpg
-    -d
+  - travis_retry git clone --depth 1 $GRAVIS_REPO $GRAVIS
+  - source $GRAVIS/install-jdk
   - chmod +x gradlew
 
-script: ./gradlew check
+script: ./gradlew check --console=plain --parallel
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -30,7 +38,7 @@ cache:
 
 deploy:
   provider: script
-  script: ./gradlew publish
+  script: ./gradlew bintrayUpload --console=plain --parallel
   skip_cleanup: true
   on:
     tags: true
