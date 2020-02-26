@@ -1,13 +1,14 @@
 package extra.kotlin.build
 
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.jfrog.bintray.gradle.BintrayPlugin
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import org.gradle.api.*
+import org.gradle.api.Action
+import org.gradle.api.JavaVersion
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.SigningPlugin

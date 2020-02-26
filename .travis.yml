@@ -4,6 +4,7 @@ jobs:
       language: bash
 
     - os: osx
+      osx_image: xcode11.3
       language: bash
 
     - os: linux
