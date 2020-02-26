@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.Family.*
 import org.jetbrains.kotlin.konan.target.KonanTarget
 
-@Suppress("PropertyName")
+@Suppress("PropertyName", "ObjectPropertyName")
 val `TRAVIS-TAG`
     get() = with(System.getenv("TRAVIS_TAG")) {
         if (isNullOrBlank()) null else this
@@ -160,3 +160,12 @@ val KotlinMultiplatformExtension.jvmTargets
 
 val KotlinMultiplatformExtension.jsTargets
     get() = targets.filterIsInstance<KotlinJsTarget>()
+
+val isContinuousIntegration
+    get() = !System.getenv("CI").isNullOrBlank()
+
+val isAndroidEnabled
+    get () = !isContinuousIntegration || (isContinuousIntegration && OperatingSystem.current().isLinux)
+
+fun <T> T.alsoIf(condition: Boolean, function: (T) -> Unit): T =
+    if (condition) apply(function) else this

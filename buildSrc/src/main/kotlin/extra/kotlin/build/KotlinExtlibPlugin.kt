@@ -19,26 +19,28 @@ class KotlinExtlibPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
 
         apply<MavenPublishPlugin>()
-        apply<AndroidLibraryPlugin>()
         apply<KotlinMultiplatformPluginWrapper>()
         apply<BintrayPlugin>()
         apply<SigningPlugin>()
 
-        android {
+        if (isAndroidEnabled) {
+            apply<AndroidLibraryPlugin>()
+            android {
 
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_1_8
-                targetCompatibility = JavaVersion.VERSION_1_8
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_1_8
+                    targetCompatibility = JavaVersion.VERSION_1_8
+                }
+
+                compileSdkVersion(29)
+                buildToolsVersion("30.0.0-rc1")
+
+                defaultConfig {
+                    minSdkVersion(14)
+                }
+
+                alignSourcesForKotlinMultiplatformPlugin(target)
             }
-
-            compileSdkVersion(29)
-            buildToolsVersion("30.0.0-rc1")
-
-            defaultConfig {
-                minSdkVersion(14)
-            }
-
-            alignSourcesForKotlinMultiplatformPlugin(target)
         }
 
         val publicationLambda = Action<MavenPublication> {
@@ -47,13 +49,15 @@ class KotlinExtlibPlugin : Plugin<Project> {
         }
 
         kotlin {
-            android {
-                publishLibraryVariants("release")
-                mavenPublication(publicationLambda)
-                compilations.all {
-                    kotlinOptions.jvmTarget = "1.8"
+
+            if (isAndroidEnabled)
+                android {
+                    publishLibraryVariants("release")
+                    mavenPublication(publicationLambda)
+                    compilations.all {
+                        kotlinOptions.jvmTarget = "1.8"
+                    }
                 }
-            }
 
             js {
                 browser()
@@ -111,11 +115,13 @@ class KotlinExtlibPlugin : Plugin<Project> {
                 }
             }
 
-            android.sourceSets["main"].java.srcDir(syncJvmTargets.destinationDir)
+            if (isAndroidEnabled) {
+                android.sourceSets["main"].java.srcDir(syncJvmTargets.destinationDir)
 
-            tasks.all {
-                if ("android" in name.toLowerCase() && "kotlin" in name.toLowerCase())
-                    dependsOn(syncJvmTargets)
+                tasks.all {
+                    if ("android" in name.toLowerCase() && "kotlin" in name.toLowerCase())
+                        dependsOn(syncJvmTargets)
+                }
             }
 
             sourceSets {
@@ -141,15 +147,17 @@ class KotlinExtlibPlugin : Plugin<Project> {
                         implementation(kotlin("test-junit"))
                     }
                 }
-                val androidMain by getting {
-                    dependencies {
-                        implementation(kotlin("stdlib-jdk8"))
+                if (isAndroidEnabled) {
+                    val androidMain by getting {
+                        dependencies {
+                            implementation(kotlin("stdlib-jdk8"))
+                        }
                     }
-                }
-                val androidTest by getting {
-                    dependencies {
-                        implementation(kotlin("test"))
-                        implementation(kotlin("test-junit"))
+                    val androidTest by getting {
+                        dependencies {
+                            implementation(kotlin("test"))
+                            implementation(kotlin("test-junit"))
+                        }
                     }
                 }
                 val jsMain by getting {
@@ -198,8 +206,8 @@ class KotlinExtlibPlugin : Plugin<Project> {
             setPublicationsOsBased(
                 kotlin.appleTargets.names,
                 kotlin.windowsTargets.names,
-                (publishing.publications.names - kotlin.appleTargets.names - kotlin.windowsTargets.names
-                        + "androidRelease")
+                (publishing.publications.names - kotlin.appleTargets.names - kotlin.windowsTargets.names)
+                    .alsoIf(isAndroidEnabled) { it + "androidRelease" }
             )
         }
 
