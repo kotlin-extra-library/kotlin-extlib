@@ -34,7 +34,7 @@ class KotlinExtlibPlugin : Plugin<Project> {
                 }
 
                 compileSdkVersion(29)
-                buildToolsVersion("30.0.0-rc1")
+                buildToolsVersion("29.0.3")
 
                 defaultConfig {
                     minSdkVersion(14)
